@@ -25,16 +25,26 @@ def syncTree (src,dst,delete=False,verbose=False,fake=False):
 			srcName = os.path.join(src,name)
 			dstName = os.path.join(dst,name)
 			if os.path.isdir(srcName):
-				print "d+ - %s" % dstName
 				if not fake:
-					os.makedirs(dstName)
+					try:
+						os.makedirs(dstName)
+						if v: print "d+ - %s" % dstName
+					except:
+						if v: print "d# - ERROR: %s can't be created." % dstName
+						continue
+					# a new dir, a new synTree
 					syncTree(srcName,dstName,verbose=v,delete=delete,fake=fake)
+
 			else: 
 				# we have a file
 				if not fake:
-					shutil.copy2(srcName,dstName)
-					shutil.copystat(srcName,dstName)
-				print "f+ - %s ---> %s" % (srcName,dstName)
+					try:
+						shutil.copy2(srcName,dstName)
+						shutil.copystat(srcName,dstName)
+					except:
+						if v: print "f# - ERROR: %s can't be written." % dstName
+						continue
+				if v: print "f+ - %s ---> %s" % (srcName,dstName)
 
 	# for the directories we had common, launch the syncTree
 	for name in dirCmp.common_dirs:
@@ -46,14 +56,18 @@ def syncTree (src,dst,delete=False,verbose=False,fake=False):
 		if not name[:1] is ".": 
 			srcName = os.path.join(src,name)
 			dstName = os.path.join(dst,name)
-			# compare the creation date
+			# compare the stats
 			if not filecmp.cmp(srcName,dstName):
 				# files are not the same, we copy the src to dst
 				if not fake:
-					os.remove(dstName)
-					shutil.copy2(srcName,dstName)
-					shutil.copystat(srcName,dstName)
-				if v: print "fu - %s ---> %s" % (srcName,dstName)
+					try:
+						os.remove(dstName)
+						shutil.copy2(srcName,dstName)
+						shutil.copystat(srcName,dstName)
+					except:
+						print "f# - ERROR: %s can't be updated" % dstName
+						continue
+					if v: print "fu - %s ---> %s" % (srcName,dstName)
 
 
 	# for the directories and files only existing in the destination, if the complete flag is set
@@ -63,13 +77,19 @@ def syncTree (src,dst,delete=False,verbose=False,fake=False):
 				dstName = os.path.join(dst,name)
 				if os.path.isdir(dstName):
 					if not fake:
-						shutil.rmtree(dstName)
+						try:
+							shutil.rmtree(dstName)
+						except:
+							if v: print "d# - ERROR: %s can't be removed." % dstName
+							continue
 					if v: print "d- ---x %s" % dstName
 				else:
 					if not fake: 
-						os.remove(dstName)
+						try:
+							os.remove(dstName)
+						except:
+							if v: print "d# - ERROR: %s can't be removed." % dstName
 					if v: print "f- ---x %s" % dstName
-
 
 
 
@@ -78,8 +98,8 @@ argParser = argparse.ArgumentParser(description="pysync.py v%d.%d-- Syncs the fi
 parseGroup = argParser.add_mutually_exclusive_group(required=True)
 parseGroup.add_argument("-s","--sync",action="store_true",help="Standard sync, origin overwrites destination, deletes surplus files at destination")
 parseGroup.add_argument("-c","--complete",action="store_true",help="Completion sync, origin is added to destination, no files are deleted in destination.")
-argParser.add_argument("-v","--verbose",action="store_true",help="Print out all actions taken by the script")
-argParser.add_argument("-f","--fake",action="store_true",help="Only simulate the actions")
+argParser.add_argument("-v","--verbose",action="store_true",help="Log all actions taken by the script to the command line.")
+argParser.add_argument("-f","--fake",action="store_true",help="Only simulate the actions. Use this with the --verbose option.")
 argParser.add_argument("origin",help="The origin directory.")
 argParser.add_argument("destination",help="The destination directory.")
 args = argParser.parse_args()
