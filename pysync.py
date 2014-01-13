@@ -30,7 +30,7 @@ def syncTree (src,dst,delete=False,verbose=False,fake=False):
 						os.makedirs(dstName)
 						if v: print "d+ - %s" % dstName
 					except:
-						if v: print "d# - ERROR: %s can't be created." % dstName
+						print "d# - ERROR: %s can't be created." % dstName
 						continue
 					# a new dir, a new synTree
 					syncTree(srcName,dstName,verbose=v,delete=delete,fake=fake)
@@ -42,7 +42,7 @@ def syncTree (src,dst,delete=False,verbose=False,fake=False):
 						shutil.copy2(srcName,dstName)
 						shutil.copystat(srcName,dstName)
 					except:
-						if v: print "f# - ERROR: %s can't be written." % dstName
+						print "f# - ERROR: %s can't be written." % dstName
 						continue
 				if v: print "f+ - %s ---> %s" % (srcName,dstName)
 
@@ -80,7 +80,7 @@ def syncTree (src,dst,delete=False,verbose=False,fake=False):
 						try:
 							shutil.rmtree(dstName)
 						except:
-							if v: print "d# - ERROR: %s can't be removed." % dstName
+							print "d# - ERROR: %s can't be removed." % dstName
 							continue
 					if v: print "d- ---x %s" % dstName
 				else:
@@ -88,7 +88,7 @@ def syncTree (src,dst,delete=False,verbose=False,fake=False):
 						try:
 							os.remove(dstName)
 						except:
-							if v: print "d# - ERROR: %s can't be removed." % dstName
+							print "d# - ERROR: %s can't be removed." % dstName
 					if v: print "f- ---x %s" % dstName
 
 
