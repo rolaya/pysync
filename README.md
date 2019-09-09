@@ -7,9 +7,9 @@ The goal of this script is to be able to keep two huge file trees synchronized, 
 
 With the "-s" option, all files in the destination that are not in the origin are deleted. 
 With the "-c" option, nothing is removed.
+With the "-a" option, all files (including hidden files are copied).
 
-Some limitations: 
-- tested exclusively on Mac OS X 10.9
-- ignores all hidden files
+Notes (in additional to original baseline): 
+- tested exclusively on Linux Debian Stretch.
 
 
